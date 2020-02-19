@@ -48,6 +48,7 @@ public class GrandExchangeClient
 
 	public void submit(GrandExchangeTrade grandExchangeTrade)
 	{
+		/*
 		final HttpUrl url = RuneLiteAPI.getApiBase().newBuilder()
 			.addPathSegment("ge")
 			.build();
@@ -73,5 +74,7 @@ public class GrandExchangeClient
 				response.close();
 			}
 		});
+
+		 */
 	}
 }
