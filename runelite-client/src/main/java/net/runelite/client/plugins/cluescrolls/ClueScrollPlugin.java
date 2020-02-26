@@ -396,14 +396,17 @@ public class ClueScrollPlugin extends Plugin
 		if (clue instanceof LocationClueScroll)
 		{
 			final WorldPoint[] locations = ((LocationClueScroll) clue).getLocations();
+			final boolean npcHintArrowMarked = client.getHintArrowNpc() != null && npcsToMark.contains(client.getHintArrowNpc());
+
+			if (!npcHintArrowMarked)
+			{
+				client.clearHintArrow();
+			}
 
 			for (WorldPoint location : locations)
 			{
 				// Only set the location hint arrow if we do not already have more accurate location
-				if (location.isInScene(client)
-					&& config.displayHintArrows()
-					&& (client.getHintArrowNpc() == null
-					|| !npcsToMark.contains(client.getHintArrowNpc())))
+				if (location.isInScene(client) && config.displayHintArrows() && !npcHintArrowMarked)
 				{
 					client.setHintArrow(location);
 				}
@@ -458,9 +461,17 @@ public class ClueScrollPlugin extends Plugin
 		if (developerMode && commandExecuted.getCommand().equals("clue"))
 		{
 			String text = Strings.join(commandExecuted.getArguments(), " ");
-			ClueScroll clueScroll = findClueScroll(text);
-			log.debug("Found clue scroll for '{}': {}", text, clueScroll);
-			updateClue(clueScroll);
+
+			if (text.isEmpty())
+			{
+				resetClue(true);
+			}
+			else
+			{
+				ClueScroll clueScroll = findClueScroll(text);
+				log.debug("Found clue scroll for '{}': {}", text, clueScroll);
+				updateClue(clueScroll);
+			}
 		}
 	}
 
