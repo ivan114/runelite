@@ -96,6 +96,7 @@ public class GrandExchangePlugin extends Plugin
 	private static final String OSB_GE_TEXT = "<br>OSBuddy Actively traded price: ";
 
 	private static final String BUY_LIMIT_GE_TEXT = "<br>Buy limit: ";
+	private static final String HA_VALUE_GE_TEXT = "\t\tHA value: ";
 	private static final Gson GSON = new Gson();
 	private static final TypeToken<Map<Integer, Integer>> BUY_LIMIT_TOKEN = new TypeToken<Map<Integer, Integer>>()
 	{
@@ -510,6 +511,14 @@ public class GrandExchangePlugin extends Plugin
 			if (itemStats != null && itemStats.getGeLimit() > 0)
 			{
 				text += BUY_LIMIT_GE_TEXT + QuantityFormatter.formatNumber(itemStats.getGeLimit());
+			}
+		}
+
+		if(config.enableHAValue())
+		{
+			final ItemComposition itemStats = itemManager.getItemComposition(itemId);
+			if (itemStats != null){
+				text += HA_VALUE_GE_TEXT + QuantityFormatter.formatNumber(itemStats.getPrice() * 0.6);
 			}
 		}
 

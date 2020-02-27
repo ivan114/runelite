@@ -76,7 +76,18 @@ public interface GrandExchangeConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 5,
+			position = 5,
+			keyName = "enableHAValue",
+			name = "Enable HA Price on GE",
+			description = "Shows the HA value on the GE"
+	)
+	default boolean enableHAValue()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		position = 6,
 		keyName = "showTotal",
 		name = "Show grand exchange total",
 		description = "Show grand exchange total"
@@ -87,7 +98,7 @@ public interface GrandExchangeConfig extends Config
 	}
 
 	@ConfigItem(
-		position = 6,
+		position = 7,
 		keyName = "showExact",
 		name = "Show exact total value",
 		description = "Show exact total value"
