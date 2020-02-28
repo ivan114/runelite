@@ -29,16 +29,19 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.inject.Provides;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.inject.Inject;
+import net.runelite.api.ChatLineBuffer;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.MessageNode;
 import net.runelite.api.Player;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.api.events.OverheadTextChanged;
 import net.runelite.api.events.ScriptCallbackEvent;
@@ -47,6 +50,7 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ClanManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.StringUtils;
 
@@ -63,6 +67,10 @@ public class ChatFilterPlugin extends Plugin
 		.trimResults();
 
 	private static final String CENSOR_MESSAGE = "Hey, everyone, I just tried to say something very silly!";
+	
+	private static final String MESSAGE_QUANTITY_PREFIX = " x ";
+	private static final int MESSAGE_QUANTITY_DEFAULT = 1;
+	private static final int VISIBLE_MESSAGES = 8;
 
 	private final CharMatcher jagexPrintableCharMatcher = Text.JAGEX_PRINTABLE_CHAR_MATCHER;
 	private final List<Pattern> filteredPatterns = new ArrayList<>();
@@ -252,5 +260,102 @@ public class ChatFilterPlugin extends Plugin
 
 		//Refresh chat after config change to reflect current rules
 		client.refreshChat();
+	}
+	
+	@Subscribe
+	public void onChatMessage(ChatMessage event)
+	{
+		if (!config.collapseChatMessages())
+		{
+			return;
+		}
+
+		collapseDuplicateMessages(event.getMessageNode());
+	}
+
+	private void collapseDuplicateMessages(MessageNode node)
+	{
+		MessageNode oldNode = findMessage(node);
+		if (oldNode == null)
+		{
+			return;
+		}
+		oldNode.setValue(addMessageQuantity(oldNode.getValue()));
+		for (ChatLineBuffer b : client.getChatLineMap().values())
+		{
+			b.removeMessageNode(node);
+		}
+		client.refreshChat();
+	}
+
+	private MessageNode findMessage(MessageNode node)
+	{
+		List<MessageNode> nodeList = new ArrayList<>();
+		for (ChatLineBuffer b : client.getChatLineMap().values())
+		{
+			for (MessageNode n : b.getLines())
+			{
+				if (n != null)
+				{
+					nodeList.add(n);
+				}
+			}
+		}
+		nodeList.sort(Comparator.comparing(MessageNode::getId).reversed());
+		for (int i = 0; i < nodeList.size(); i++)
+		{
+			if (i > VISIBLE_MESSAGES)
+			{
+				break;
+			}
+			MessageNode n = nodeList.get(i);
+			if (isEqual(n, node))
+			{
+				return n;
+			}
+		}
+		return null;
+	}
+
+	private boolean isEqual(MessageNode oldNode, MessageNode newNode)
+	{
+		return oldNode.getId() != newNode.getId() && oldNode.getType().equals(newNode.getType()) &&
+			Objects.equals(oldNode.getSender(), newNode.getSender()) &&
+			oldNode.getName().equals(newNode.getName()) &&
+			Text.removeStyleTags(stripMessageQuantity(oldNode.getValue())).equals(Text.removeStyleTags(newNode.getValue()));
+	}
+
+	private String stripMessageQuantity(String message)
+	{
+		int quantity = findMessageQuantity(message);
+		if (quantity > MESSAGE_QUANTITY_DEFAULT)
+		{
+			String end = ColorUtil.colorTag(config.chatMessageCountColor()) + MESSAGE_QUANTITY_PREFIX + quantity;
+			if (message.endsWith(end) || message.endsWith(end + ColorUtil.CLOSING_COLOR_TAG))
+			{
+				// Jagex sometimes append "</col>" to the end of messages
+				return message.substring(0, message.lastIndexOf(end));
+			}
+		}
+		return message;
+	}
+
+	private String addMessageQuantity(String message)
+	{
+		int quantity = findMessageQuantity(message) + 1;
+		return stripMessageQuantity(message) + ColorUtil.colorTag(config.chatMessageCountColor()) +
+			MESSAGE_QUANTITY_PREFIX + quantity;
+	}
+
+	private int findMessageQuantity(String message)
+	{
+		String quantityPrefix = ColorUtil.colorTag(config.chatMessageCountColor()) + MESSAGE_QUANTITY_PREFIX;
+		int start = message.lastIndexOf(quantityPrefix);
+		if (start >= 0)
+		{
+			String quantity = Text.removeTags(message.substring(start + quantityPrefix.length()));
+			return Integer.parseInt(quantity);
+		}
+		return MESSAGE_QUANTITY_DEFAULT;
 	}
 }
