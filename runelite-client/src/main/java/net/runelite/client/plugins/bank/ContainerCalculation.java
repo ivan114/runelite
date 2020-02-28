@@ -48,7 +48,7 @@ class ContainerCalculation
 	}
 
 	@Nullable
-	ContainerPrices calculate(Item[] items)
+	ContainerPrices calculate(Item[] items, boolean includeUntradableBond)
 	{
 		// Returns last calculation if inventory hasn't changed
 		final int newHash =  hashItems(items);
@@ -86,7 +86,9 @@ class ContainerCalculation
 					final long storePrice = itemManager.getItemComposition(id).getPrice();
 					final long alchPrice = (long) (storePrice * Constants.HIGH_ALCHEMY_MULTIPLIER);
 					alch += alchPrice * qty;
-					ge += (long) itemManager.getItemPrice(id) * qty;
+					final boolean needUntradableBondMapping = includeUntradableBond && (id == ItemID.OLD_SCHOOL_BOND_UNTRADEABLE);
+					final int finalId = needUntradableBondMapping ? ItemID.OLD_SCHOOL_BOND : id;
+					ge += (long) itemManager.getItemPrice(finalId) * qty * (needUntradableBondMapping ? 0.9 : 1);
 					break;
 			}
 

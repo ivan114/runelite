@@ -108,4 +108,15 @@ public interface BankConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+			keyName = "includeUntradableBondValue",
+			name = "Include untradable bond value",
+			description = "Include untradable bond value in bank value calculation",
+			position = 8
+	)
+	default boolean includeUntradableBondValue()
+	{
+		return false;
+	}
 }
