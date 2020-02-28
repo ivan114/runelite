@@ -167,9 +167,7 @@ class GrandExchangeItemPanel extends JPanel
 
 	private static void geLink(String name, int itemID)
 	{
-		final String url = "http://services.runescape.com/m=itemdb_oldschool/"
-			+ name.replaceAll(" ", "_")
-			+ "/viewitem?obj="
+		final String url = "https://www.ge-tracker.com/item/"
 			+ itemID;
 
 		LinkBrowser.browse(url);
