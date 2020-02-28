@@ -32,6 +32,7 @@ import com.google.gson.Gson;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import javax.inject.Inject;
@@ -150,6 +151,8 @@ public class GrandExchangePlugin extends Plugin
 	private Widget grandExchangeText;
 	private Widget grandExchangeItem;
 
+	private AES aes;
+
 	private int osbItem;
 	private OSBGrandExchangeResult osbGrandExchangeResult;
 
@@ -162,12 +165,12 @@ public class GrandExchangePlugin extends Plugin
 		{
 			return null;
 		}
-		return GSON.fromJson(offer, SavedOffer.class);
+		return GSON.fromJson(aes.decrypt(offer), SavedOffer.class);
 	}
 
 	private void setOffer(int slot, SavedOffer offer)
 	{
-		configManager.setConfiguration("geoffer." + client.getUsername().toLowerCase(), Integer.toString(slot), GSON.toJson(offer));
+		configManager.setConfiguration("geoffer." + client.getUsername().toLowerCase(), Integer.toString(slot), aes.encrypt(GSON.toJson(offer)));
 	}
 
 	private void deleteOffer(int slot)
@@ -207,10 +210,15 @@ public class GrandExchangePlugin extends Plugin
 		if (accountSession != null)
 		{
 			grandExchangeClient = new GrandExchangeClient(accountSession.getUuid());
+			prepareAES(accountSession);
 		}
 
 		osbItem = -1;
 		osbGrandExchangeResult = null;
+	}
+
+	private void prepareAES(AccountSession accountSession) {
+		aes = new AES(Base64.getEncoder().encodeToString(accountSession.getUuid().toString().getBytes()));
 	}
 
 	@Override
@@ -231,10 +239,12 @@ public class GrandExchangePlugin extends Plugin
 		if (accountSession.getUuid() != null)
 		{
 			grandExchangeClient = new GrandExchangeClient(accountSession.getUuid());
+			prepareAES(accountSession);
 		}
 		else
 		{
 			grandExchangeClient = null;
+			aes = null;
 		}
 	}
 
