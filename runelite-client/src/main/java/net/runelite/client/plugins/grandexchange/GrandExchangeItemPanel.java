@@ -25,16 +25,12 @@
  */
 package net.runelite.client.plugins.grandexchange;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import javax.inject.Inject;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
@@ -50,10 +46,13 @@ import net.runelite.client.util.QuantityFormatter;
  */
 class GrandExchangeItemPanel extends JPanel
 {
+//	@Inject
+//	private GrandExchangeConfig config;
+
 	private static final Dimension ICON_SIZE = new Dimension(32, 32);
 
 	GrandExchangeItemPanel(AsyncBufferedImage icon, String name, int itemID, int gePrice, Double
-		haPrice, int geItemLimit)
+		haPrice, int geItemLimit, boolean isMember)
 	{
 		BorderLayout layout = new BorderLayout();
 		layout.setHgap(5);
@@ -108,7 +107,16 @@ class GrandExchangeItemPanel extends JPanel
 		add(itemIcon, BorderLayout.LINE_START);
 
 		// Item details panel
-		JPanel rightPanel = new JPanel(new GridLayout(3, 1));
+		JPanel rightPanel = new JPanel(new GridLayout(3, 1)){
+			@Override
+			protected void paintComponent(Graphics graphics) {
+				super.paintComponent(graphics);
+				if(/** config.unfocusMemberItems() && */ isMember){
+					Graphics2D g2d = (Graphics2D) graphics;
+					g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
+				}
+			}
+		};
 		panels.add(rightPanel);
 		rightPanel.setBackground(background);
 

@@ -32,8 +32,10 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
+import javax.inject.Inject;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
@@ -54,6 +56,9 @@ import net.runelite.http.api.item.ItemStats;
  */
 class GrandExchangeSearchPanel extends JPanel
 {
+//	@Inject
+//	private GrandExchangeConfig config;
+
 	private static final String ERROR_PANEL = "ERROR_PANEL";
 	private static final String RESULTS_PANEL = "RESULTS_PANEL";
 	private static final int MAX_SEARCH_ITEMS = 100;
@@ -210,13 +215,17 @@ class GrandExchangeSearchPanel extends JPanel
 			int itemLimit = itemStats != null ? itemStats.getGeLimit() : 0;
 			AsyncBufferedImage itemImage = itemManager.getImage(itemId);
 
-			itemsList.add(new GrandExchangeItems(itemImage, item.getName(), itemId, itemPrice, itemComp.getPrice() * 0.6, itemLimit));
+			itemsList.add(new GrandExchangeItems(itemImage, item.getName(), itemId, itemPrice, itemComp.getPrice() * 0.6, itemLimit, itemComp.isMembers()));
 
 			// If using hotkey to lookup item, stop after finding match.
 			if (exactMatch && item.getName().equalsIgnoreCase(lookup))
 			{
 				break;
 			}
+
+//			if (config.unfocusMemberItems()){
+				itemsList.sort(Comparator.comparing(GrandExchangeItems::isMember));
+//			}
 		}
 
 		SwingUtilities.invokeLater(() ->
@@ -225,7 +234,7 @@ class GrandExchangeSearchPanel extends JPanel
 			for (GrandExchangeItems item : itemsList)
 			{
 				GrandExchangeItemPanel panel = new GrandExchangeItemPanel(item.getIcon(), item.getName(),
-					item.getItemId(), item.getGePrice(), item.getHaPrice(), item.getGeItemLimit());
+					item.getItemId(), item.getGePrice(), item.getHaPrice(), item.getGeItemLimit(), item.isMember());
 
 				/*
 				Add the first item directly, wrap the rest with margin. This margin hack is because

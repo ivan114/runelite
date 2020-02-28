@@ -107,4 +107,15 @@ public interface GrandExchangeConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+			position = 8,
+			keyName = "unfocusMemberItems",
+			name = "Unfocus member items in search",
+			description = "Unfocus member items in search"
+	)
+	default boolean unfocusMemberItems()
+	{
+		return false;
+	}
 }

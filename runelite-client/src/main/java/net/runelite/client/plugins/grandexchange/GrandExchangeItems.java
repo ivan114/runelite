@@ -36,4 +36,5 @@ class GrandExchangeItems
 	private final int gePrice;
 	private final double haPrice;
 	private final int geItemLimit;
+	private final boolean isMember;
 }
