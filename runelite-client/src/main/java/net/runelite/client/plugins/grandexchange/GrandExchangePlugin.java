@@ -32,6 +32,7 @@ import com.google.gson.Gson;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,14 +42,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
-import net.runelite.api.GameState;
-import net.runelite.api.GrandExchangeOffer;
-import net.runelite.api.GrandExchangeOfferState;
-import net.runelite.api.ItemComposition;
-import net.runelite.api.MenuAction;
-import net.runelite.api.MenuEntry;
+import net.runelite.api.*;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.FocusChanged;
 import net.runelite.api.events.GameStateChanged;
@@ -92,12 +86,18 @@ import net.runelite.http.api.osbuddy.OSBGrandExchangeResult;
 public class GrandExchangePlugin extends Plugin
 {
 	private static final int OFFER_CONTAINER_ITEM = 21;
+	private static final int OFFER_ITEM_OFFER = 39;
+	private static final int OFFER_TOTAL_OFFER = 43;
 	private static final int OFFER_DEFAULT_ITEM_ID = 6512;
-	private static final OSBGrandExchangeClient CLIENT = new OSBGrandExchangeClient();
-	private static final String OSB_GE_TEXT = "<br>OSBuddy Actively traded price: ";
 
+	private static final OSBGrandExchangeClient CLIENT = new OSBGrandExchangeClient();
+
+	private static final String OSB_GE_TEXT = "<br>OSBuddy Actively traded price: ";
+	private static final String HA_SYMBOL = "¤";
+	private static final String HA_PROFIT_SYMBOL = "º";
 	private static final String BUY_LIMIT_GE_TEXT = "<br>Buy limit: ";
 	private static final String HA_VALUE_GE_TEXT = "      HA value: ";
+
 	private static final Gson GSON = new Gson();
 	private static final TypeToken<Map<Integer, Integer>> BUY_LIMIT_TOKEN = new TypeToken<Map<Integer, Integer>>()
 	{
@@ -150,11 +150,15 @@ public class GrandExchangePlugin extends Plugin
 
 	private Widget grandExchangeText;
 	private Widget grandExchangeItem;
+	private Widget grandExchangePrice;
+	private Widget grandExchangeTotalOffer;
+	private Widget grandExchangeItemOffer;
 
 	private AES aes;
 
 	private int osbItem;
 	private OSBGrandExchangeResult osbGrandExchangeResult;
+	private OSBGrandExchangeResult osbNatureRuneGrandExchangeResult;
 
 	private GrandExchangeClient grandExchangeClient;
 
@@ -215,6 +219,7 @@ public class GrandExchangePlugin extends Plugin
 
 		osbItem = -1;
 		osbGrandExchangeResult = null;
+		osbNatureRuneGrandExchangeResult = null;
 	}
 
 	private void prepareAES(AccountSession accountSession) {
@@ -229,6 +234,8 @@ public class GrandExchangePlugin extends Plugin
 		keyManager.unregisterKeyListener(inputListener);
 		grandExchangeText = null;
 		grandExchangeItem = null;
+		grandExchangePrice = null;
+		grandExchangeTotalOffer = null;
 		grandExchangeClient = null;
 	}
 
@@ -436,12 +443,19 @@ public class GrandExchangePlugin extends Plugin
 			case WidgetID.GRAND_EXCHANGE_GROUP_ID:
 				Widget grandExchangeOffer = client.getWidget(WidgetInfo.GRAND_EXCHANGE_OFFER_CONTAINER);
 				grandExchangeText = client.getWidget(WidgetInfo.GRAND_EXCHANGE_OFFER_TEXT);
+				grandExchangePrice = client.getWidget(WidgetInfo.GRAND_EXCHANGE_OFFER_PRICE);
+				grandExchangeTotalOffer = grandExchangeOffer.getDynamicChildren()[OFFER_TOTAL_OFFER];
+				grandExchangeItemOffer = grandExchangeOffer.getDynamicChildren()[OFFER_ITEM_OFFER];
 				grandExchangeItem = grandExchangeOffer.getDynamicChildren()[OFFER_CONTAINER_ITEM];
 				break;
 			// Grand exchange was closed (if it was open before).
 			case WidgetID.INVENTORY_GROUP_ID:
 				grandExchangeText = null;
+				grandExchangePrice = null;
+				grandExchangeTotalOffer = null;
+				grandExchangeItemOffer = null;
 				grandExchangeItem = null;
+				osbNatureRuneGrandExchangeResult = null;
 				break;
 		}
 	}
@@ -526,9 +540,26 @@ public class GrandExchangePlugin extends Plugin
 
 		if(config.enableHAValue())
 		{
-			final ItemComposition itemStats = itemManager.getItemComposition(itemId);
-			if (itemStats != null){
-				text += HA_VALUE_GE_TEXT + QuantityFormatter.formatNumber(itemStats.getPrice() * 0.6);
+			int haValue = getHaValue(itemId);
+
+			text += HA_VALUE_GE_TEXT + QuantityFormatter.formatNumber(haValue);
+
+			if(osbNatureRuneGrandExchangeResult != null){
+				injectHAProfit(itemId, haValue, osbNatureRuneGrandExchangeResult.getOverall_average());
+			}else{
+				executorService.submit(() ->
+				{
+					try
+					{
+						final OSBGrandExchangeResult result = CLIENT.lookupItem(ItemID.NATURE_RUNE);
+						osbNatureRuneGrandExchangeResult = result;
+						injectHAProfit(itemId, haValue, osbNatureRuneGrandExchangeResult.getOverall_average());
+					}
+					catch (IOException e)
+					{
+						log.debug("Error getting price of item {}", ItemID.NATURE_RUNE, e);
+					}
+				});
 			}
 		}
 
@@ -570,5 +601,53 @@ public class GrandExchangePlugin extends Plugin
 				log.debug("Error getting price of item {}", itemId, e);
 			}
 		});
+	}
+
+	private int getHaValue(int itemId) {
+		final ItemComposition itemStats = itemManager.getItemComposition(itemId);
+		return (int)(itemStats.getPrice() * Constants.HIGH_ALCHEMY_MULTIPLIER);
+	}
+
+	private void injectHAProfit(int itemId, int itemHAValue, int natureRunePrice) {
+		final Widget totalOfferText = grandExchangeTotalOffer;
+		String tString = totalOfferText.getText();
+		long totalOfferValue;
+		try {
+			totalOfferValue = QuantityFormatter.parseQuantity(tString.split(" ")[0]);
+		} catch (ParseException | IndexOutOfBoundsException e) {
+			log.debug("Unable to parse value: " + tString, e);
+			return;
+		}
+
+		final Widget itemOfferText = grandExchangeItemOffer;
+		String iString = itemOfferText.getText();
+		long itemOfferValue;
+		try {
+			itemOfferValue = QuantityFormatter.parseQuantity(iString.split(" ")[0]);
+		} catch (ParseException | IndexOutOfBoundsException e) {
+			log.debug("Unable to parse value: " + iString, e);
+			return;
+		}
+
+		// Check if there is profit for HA
+		if (itemHAValue <= itemOfferValue) {
+			return;
+		}
+
+		long itemProfit = itemHAValue - itemOfferValue;
+		itemOfferText.setText(iString + " ("
+				+ HA_SYMBOL + QuantityFormatter.formatNumber(itemProfit)
+				+ ") ("
+				+ HA_PROFIT_SYMBOL + QuantityFormatter.formatNumber(itemProfit - natureRunePrice)
+				+ ")"
+		);
+
+		long amount = totalOfferValue / itemOfferValue;
+		totalOfferText.setText(tString + " (" + HA_SYMBOL
+				+ QuantityFormatter.formatNumber(itemProfit * amount)
+				+ ") ("
+				+ HA_PROFIT_SYMBOL + QuantityFormatter.formatNumber((itemProfit - natureRunePrice) * amount)
+				+ ")"
+		);
 	}
 }
