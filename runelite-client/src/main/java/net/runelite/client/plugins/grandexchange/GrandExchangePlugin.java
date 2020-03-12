@@ -628,6 +628,12 @@ public class GrandExchangePlugin extends Plugin
 	private void injectHAProfit(int itemId, int itemHAValue, int natureRunePrice) {
 		final Widget totalOfferText = grandExchangeTotalOffer;
 		String tString = totalOfferText.getText();
+
+		// HA Profit already injected
+		if(tString.contains(HA_SYMBOL) || tString.contains(HA_PROFIT_SYMBOL)){
+			return;
+		}
+
 		long totalOfferValue;
 		try {
 			totalOfferValue = QuantityFormatter.parseQuantity(tString.split(" ")[0]);
