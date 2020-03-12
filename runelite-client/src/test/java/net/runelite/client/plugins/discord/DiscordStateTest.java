@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Adam <Adam@sigterm.info>
+ * Copyright (c) 2018, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,88 +22,70 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.loottracker;
+package net.runelite.client.plugins.discord;
 
 import com.google.inject.Guice;
 import com.google.inject.testing.fieldbinder.Bind;
 import com.google.inject.testing.fieldbinder.BoundFieldModule;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.List;
 import javax.inject.Inject;
-import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
-import net.runelite.api.Player;
-import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.client.account.SessionManager;
-import net.runelite.client.game.SpriteManager;
-import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
-import net.runelite.http.api.loottracker.LootRecordType;
-import static org.junit.Assert.assertEquals;
+import net.runelite.client.discord.DiscordPresence;
+import net.runelite.client.discord.DiscordService;
+import net.runelite.client.ws.PartyService;
+import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.Mock;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LootTrackerPluginTest
+public class DiscordStateTest
 {
-	@Mock
-	@Bind
-	private ScheduledExecutorService scheduledExecutorService;
-
-	@Mock
-	@Bind
-	private Client client;
-
-	@Mock
-	@Bind
-	private SpriteManager spriteManager;
-
-	@Mock
-	@Bind
-	private InfoBoxManager infoBoxManager;
-
 	@Inject
-	private LootTrackerPlugin lootTrackerPlugin;
+	DiscordState discordState;
 
 	@Mock
 	@Bind
-	private LootTrackerConfig lootTrackerConfig;
+	DiscordConfig discordConfig;
 
 	@Mock
 	@Bind
-	private SessionManager sessionManager;
+	DiscordService discordService;
+
+	@Mock
+	@Bind
+	Client client;
+
+	@Mock
+	@Bind
+	PartyService partyService;
 
 	@Before
-	public void setUp()
+	public void before()
 	{
 		Guice.createInjector(BoundFieldModule.of(this)).injectMembers(this);
-
-		Player player = mock(Player.class);
-		when(player.getWorldLocation()).thenReturn(new WorldPoint(0, 0, 0));
-		when(client.getLocalPlayer()).thenReturn(player);
 	}
 
 	@Test
-	public void testPickPocket()
+	public void testStatusTimeout()
 	{
-		ChatMessage chatMessage = new ChatMessage(null, ChatMessageType.SPAM, "", "You pick the hero's pocket.", "", 0);
-		lootTrackerPlugin.onChatMessage(chatMessage);
+		when(discordConfig.actionTimeout()).thenReturn(0);
+		when(discordConfig.hideElapsedTime()).thenReturn(false);
 
-		assertEquals("Hero", lootTrackerPlugin.eventType);
-		assertEquals(LootRecordType.PICKPOCKET, lootTrackerPlugin.lootRecordType);
-	}
+		discordState.triggerEvent(DiscordGameEventType.IN_MENU);
+		verify(discordService).updatePresence(any(DiscordPresence.class));
 
-	@Test
-	public void testFirstClue()
-	{
-		ChatMessage chatMessage = new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", "You have completed 1 master Treasure Trail.", "", 0);
-		lootTrackerPlugin.onChatMessage(chatMessage);
-
-		assertEquals("Clue Scroll (Master)", lootTrackerPlugin.eventType);
-		assertEquals(LootRecordType.EVENT, lootTrackerPlugin.lootRecordType);
+		discordState.checkForTimeout();
+		ArgumentCaptor<DiscordPresence> captor = ArgumentCaptor.forClass(DiscordPresence.class);
+		verify(discordService, times(2)).updatePresence(captor.capture());
+		List<DiscordPresence> captured = captor.getAllValues();
+		assertNull(captured.get(captured.size() - 1).getEndTimestamp());
 	}
 }
