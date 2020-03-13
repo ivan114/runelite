@@ -123,4 +123,22 @@ public interface ItemIdentificationConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+			keyName = "showLanterns",
+			name = "Lanterns",
+			description = "Show identification on Lanterns"
+	)
+	default boolean showLanterns(){
+		return false;
+	};
+
+	@ConfigItem(
+			keyName = "showComposts",
+			name = "Composts",
+			description = "Show identification on Composts"
+	)
+	default boolean showComposts(){
+		return false;
+	};
 }

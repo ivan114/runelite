@@ -26,6 +26,8 @@ package net.runelite.client.plugins.itemidentification;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+
+import net.runelite.api.Item;
 import net.runelite.api.ItemID;
 
 enum ItemIdentification
@@ -209,8 +211,17 @@ enum ItemIdentification
 	NINJA_IMPLING(Type.IMPLING_JAR, "Ninja", "NIN", ItemID.NINJA_IMPLING_JAR),
 	CRYSTAL_IMPLING(Type.IMPLING_JAR, "Crystal", "C", ItemID.CRYSTAL_IMPLING_JAR),
 	DRAGON_IMPLING(Type.IMPLING_JAR, "Dragon", "D", ItemID.DRAGON_IMPLING_JAR),
-	LUCKY_IMPLING(Type.IMPLING_JAR, "Lucky", "L", ItemID.LUCKY_IMPLING_JAR);
+	LUCKY_IMPLING(Type.IMPLING_JAR, "Lucky", "L", ItemID.LUCKY_IMPLING_JAR),
 
+	// Lantern
+	BULLEYES_LANTERN_EMPTY(Type.LANTERN, "Empty", "E",ItemID.BULLSEYE_LANTERN_EMPTY),
+	BULLEYES_LANTERN_UNFILLED(Type.LANTERN, "Unfilled", "U",ItemID.BULLSEYE_LANTERN_UNF),
+
+	// Composes
+	NORMAL_COMPOST(Type.COMPOST, "Normal", "N", ItemID.COMPOST),
+	SUPER_COMPOST(Type.COMPOST, "Super", "S", ItemID.SUPERCOMPOST),
+	ULTRA_COMPOST(Type.COMPOST, "Normal", "N", ItemID.ULTRACOMPOST),
+	BOTTOMLESS_COMPOST(Type.COMPOST, "Bottomless", "B", ItemID.BOTTOMLESS_COMPOST_BUCKET);
 
 	final Type type;
 	final String medName;
@@ -255,6 +266,8 @@ enum ItemIdentification
 		ORE,
 		GEM,
 		POTION,
-		IMPLING_JAR
+		IMPLING_JAR,
+		LANTERN,
+		COMPOST
 	}
 }

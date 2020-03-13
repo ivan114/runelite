@@ -107,6 +107,18 @@ class ItemIdentificationOverlay extends WidgetItemOverlay
 					return;
 				}
 				break;
+			case LANTERN:
+				if (!config.showLanterns())
+				{
+					return;
+				}
+				break;
+			case COMPOST:
+				if (!config.showComposts())
+				{
+					return;
+				}
+				break;
 		}
 
 		graphics.setFont(FontManager.getRunescapeSmallFont());
