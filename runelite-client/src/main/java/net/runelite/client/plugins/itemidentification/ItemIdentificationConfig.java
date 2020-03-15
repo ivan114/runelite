@@ -141,4 +141,13 @@ public interface ItemIdentificationConfig extends Config
 	default boolean showComposts(){
 		return false;
 	};
+
+	@ConfigItem(
+			keyName = "showJars",
+			name = "Jars",
+			description = "Show identification on Jars"
+	)
+	default boolean showJars(){
+		return false;
+	};
 }

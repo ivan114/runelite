@@ -220,8 +220,13 @@ enum ItemIdentification
 	// Composes
 	NORMAL_COMPOST(Type.COMPOST, "Normal", "N", ItemID.COMPOST),
 	SUPER_COMPOST(Type.COMPOST, "Super", "S", ItemID.SUPERCOMPOST),
-	ULTRA_COMPOST(Type.COMPOST, "Normal", "N", ItemID.ULTRACOMPOST),
-	BOTTOMLESS_COMPOST(Type.COMPOST, "Bottomless", "B", ItemID.BOTTOMLESS_COMPOST_BUCKET);
+	ULTRA_COMPOST(Type.COMPOST, "Ultra", "U", ItemID.ULTRACOMPOST),
+	BOTTOMLESS_COMPOST(Type.COMPOST, "Bottomless", "B", ItemID.BOTTOMLESS_COMPOST_BUCKET),
+
+	// JARS
+	JAR_OF_WINE(Type.JAR, "Wine", "Wi", ItemID.JUG_OF_WINE),
+	JAR_OF_Water(Type.JAR, "Water", "Wa", ItemID.JUG_OF_WATER),
+	WINE_OF_ZAMORAK(Type.JAR, "Zamorak", "Z", ItemID.WINE_OF_ZAMORAK);
 
 	final Type type;
 	final String medName;
@@ -268,6 +273,7 @@ enum ItemIdentification
 		POTION,
 		IMPLING_JAR,
 		LANTERN,
-		COMPOST
+		COMPOST,
+		JAR
 	}
 }
