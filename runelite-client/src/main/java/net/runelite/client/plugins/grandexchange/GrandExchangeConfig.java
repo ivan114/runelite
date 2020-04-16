@@ -109,13 +109,24 @@ public interface GrandExchangeConfig extends Config
 	}
 
 	@ConfigItem(
-			position = 8,
-			keyName = "unfocusMemberItems",
-			name = "Unfocus member items in search",
-			description = "Unfocus member items in search"
+		position = 8,
+		keyName = "highlightSearchMatch",
+		name = "Highlight Search Match",
+		description = "Highlights the search match with an underline"
 	)
-	default boolean unfocusMemberItems()
+	default boolean highlightSearchMatch()
 	{
-		return false;
+		return true;
+	}
+
+	@ConfigItem(
+		position = 9,
+		keyName = "geSearchMode",
+		name = "Search Mode",
+		description = "The search mode to use for the GE"
+	)
+	default GrandExchangeSearchMode geSearchMode()
+	{
+		return GrandExchangeSearchMode.DEFAULT;
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2020 Abex
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,15 +22,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.http.api.item;
+package net.runelite.client.plugins.grounditems;
 
-import lombok.Data;
+import joptsimple.internal.Strings;
+import org.junit.Assert;
+import static net.runelite.client.plugins.grounditems.ItemThreshold.Inequality.*;
+import org.junit.Test;
 
-@Data
-public class Item
+public class ItemThresholdTest
 {
-	private int id;
-	private String name;
-	private String description;
-	private ItemType type;
+	@Test
+	public void test()
+	{
+		Assert.assertEquals(ItemThreshold.fromConfigEntry("Dharok's platebody 100"), new ItemThreshold("Dharok's platebody 100", 0, MORE_THAN));
+		Assert.assertEquals(ItemThreshold.fromConfigEntry("Dharok's platebody 100<100"), new ItemThreshold("Dharok's platebody 100", 100, LESS_THAN));
+		Assert.assertEquals(ItemThreshold.fromConfigEntry("Dharok's platebody > 100"), new ItemThreshold("Dharok's platebody", 100, MORE_THAN));
+		Assert.assertEquals(ItemThreshold.fromConfigEntry("Dharok's platebody < 10 0"), new ItemThreshold("Dharok's platebody", 0, MORE_THAN));
+	}
+
+	@Test(timeout = 100)
+	public void testExplosive()
+	{
+		String name = "archer" + Strings.repeat('e', 50000) + "s ring";
+		Assert.assertEquals(ItemThreshold.fromConfigEntry(name + " < 387"), new ItemThreshold(name, 387, LESS_THAN));
+	}
 }
