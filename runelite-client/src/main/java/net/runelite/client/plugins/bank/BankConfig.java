@@ -110,10 +110,21 @@ public interface BankConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "includeUntradableBondValue",
-			name = "Include untradable bond value",
-			description = "Include untradable bond value in bank value calculation",
-			position = 8
+		keyName = "bankPinKeyboard",
+		name = "Keyboard Bankpin",
+		description = "Allows using the keyboard keys for bank pin input",
+		position = 8
+	)
+	default boolean bankPinKeyboard()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "includeUntradableBondValue",
+		name = "Include untradable bond value",
+		description = "Include untradable bond value in bank value calculation",
+		position = 9
 	)
 	default boolean includeUntradableBondValue()
 	{
