@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Alexsuperfly <alexsuperfly@users.noreply.github.com>
+ * Copyright (c) 2019, Liam Edwards <http://github.com/Spedwards>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,45 +22,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.plugins.xpupdater;
+package net.runelite.client.plugins.worldhopper;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import net.runelite.http.api.worlds.WorldRegion;
 
-@ConfigGroup("xpupdater")
-public interface XpUpdaterConfig extends Config
+@NoArgsConstructor
+@AllArgsConstructor
+public enum RegionFilterMode
 {
-	@ConfigItem(
-		position = 1,
-		keyName = "cml",
-		name = "Crystal Math Labs",
-		description = "Automatically updates your stats on crystalmathlabs.com when you log out"
-	)
-	default boolean cml()
-	{
-		return false;
-	}
+	NONE,
+	AUSTRALIA(WorldRegion.AUSTRALIA),
+	GERMANY(WorldRegion.GERMANY),
+	UNITED_KINGDOM(WorldRegion.UNITED_KINGDOM)
+		{
+			@Override
+			public String toString()
+			{
+				return "U.K.";
+			}
+		},
+	UNITED_STATES(WorldRegion.UNITED_STATES_OF_AMERICA)
+		{
+			@Override
+			public String toString()
+			{
+				return "USA";
+			}
+		};
 
-	@ConfigItem(
-		position = 2,
-		keyName = "templeosrs",
-		name = "TempleOSRS",
-		description = "Automatically updates your stats on templeosrs.com when you log out"
-	)
-	default boolean templeosrs()
-	{
-		return false;
-	}
-
-	@ConfigItem(
-		position = 3,
-		keyName = "wiseoldman",
-		name = "Wise Old Man",
-		description = "Automatically updates your stats on wiseoldman.net when you log out"
-	)
-	default boolean wiseoldman()
-	{
-		return false;
-	}
+	@Getter
+	private WorldRegion region;
 }
