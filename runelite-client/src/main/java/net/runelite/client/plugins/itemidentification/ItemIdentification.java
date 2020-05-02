@@ -226,7 +226,19 @@ enum ItemIdentification
 	// JARS
 	JAR_OF_WINE(Type.JAR, "Wine", "Wi", ItemID.JUG_OF_WINE),
 	JAR_OF_Water(Type.JAR, "Water", "Wa", ItemID.JUG_OF_WATER),
-	WINE_OF_ZAMORAK(Type.JAR, "Zamorak", "Z", ItemID.WINE_OF_ZAMORAK);
+	WINE_OF_ZAMORAK(Type.JAR, "Zamorak", "Z", ItemID.WINE_OF_ZAMORAK),
+
+	// Guthix Rest
+	CUP_HOT_WATER(Type.REST, "Hot Wat.", "H.Wat", ItemID.CUP_OF_HOT_WATER),
+	MIX_H(Type.REST, "H", "H", ItemID.HERB_TEA_MIX),
+	MIX_G(Type.REST, "G", "G", ItemID.HERB_TEA_MIX_4466),
+	MIX_MH(Type.REST, "MH", "MH", ItemID.HERB_TEA_MIX_4470),
+	MIX_GH(Type.REST, "GH", "GH", ItemID.HERB_TEA_MIX_4472),
+	MIX_GG(Type.REST, "GG", "GG", ItemID.HERB_TEA_MIX_4474),
+	MIX_GM(Type.REST, "GM", "GM", ItemID.HERB_TEA_MIX_4476),
+	MIX_GMH(Type.REST, "GMH", "GMH", ItemID.HERB_TEA_MIX_4478),
+	MIX_GGM(Type.REST, "GGM", "GGM", ItemID.HERB_TEA_MIX_4480),
+	MIX_GGH(Type.REST, "GGH", "GGH", ItemID.HERB_TEA_MIX_4482);
 
 	final Type type;
 	final String medName;
@@ -274,6 +286,7 @@ enum ItemIdentification
 		IMPLING_JAR,
 		LANTERN,
 		COMPOST,
-		JAR
+		JAR,
+		REST
 	}
 }

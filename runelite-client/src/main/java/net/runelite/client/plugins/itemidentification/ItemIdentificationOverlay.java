@@ -125,6 +125,11 @@ class ItemIdentificationOverlay extends WidgetItemOverlay
 					return;
 				}
 				break;
+			case REST:
+				if(!config.showGuthixRest())
+				{
+					return;
+				}
 		}
 
 		graphics.setFont(FontManager.getRunescapeSmallFont());

@@ -150,4 +150,13 @@ public interface ItemIdentificationConfig extends Config
 	default boolean showJars(){
 		return false;
 	};
+
+	@ConfigItem(
+			keyName = "showGuthixRest",
+			name = "Rests",
+			description = "Show identification on Guthix Rest"
+	)
+	default boolean showGuthixRest(){
+		return false;
+	};
 }
