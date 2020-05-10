@@ -431,4 +431,14 @@ public interface MenuEntrySwapperConfig extends Config
 	{
 		return true;
 	}
+
+	@ConfigItem(
+			keyName = "swapBuyPlank",
+			name = "Buy Planks",
+			description = "Swap Trade with Buy-plank on Annette"
+	)
+	default boolean swapBuyPlanks()
+	{
+		return false;
+	}
 }
