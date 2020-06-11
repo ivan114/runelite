@@ -111,6 +111,32 @@ public class Text
 	}
 
 	/**
+	 * Remove tags from the given string, except for &lt;lt&gt; and &lt;gt&gt;
+	 *
+	 * @param str The string to remove formatting tags from.
+	 * @return The given string with all formatting tags removed from it.
+	 */
+	public static String removeFormattingTags(String str)
+	{
+		StringBuffer stringBuffer = new StringBuffer();
+		Matcher matcher = TAG_REGEXP.matcher(str);
+		while (matcher.find())
+		{
+			matcher.appendReplacement(stringBuffer, "");
+			String match = matcher.group(0);
+			switch (match)
+			{
+				case "<lt>":
+				case "<gt>":
+					stringBuffer.append(match);
+					break;
+			}
+		}
+		matcher.appendTail(stringBuffer);
+		return stringBuffer.toString();
+	}
+
+	/**
 	 * In addition to removing all tags, replaces nbsp with space, trims string and lowercases it
 	 * @param str The string to standardize
 	 *

@@ -109,26 +109,37 @@ public interface ChatFilterConfig extends Config
 	{
 		return false;
 	}
-	
+
 	@ConfigItem(
-		keyName = "collapseChatMessages",
-		name = "Collapse chat messages",
-		description = "Collapses chat messages together and appends count",
-		position = 7
+		keyName = "collapseGameChat",
+		name = "Collapse Game Chat",
+		description = "Collapse duplicate game chat messages into a single line",
+		position = 9
 	)
-	default boolean collapseChatMessages()
+	default boolean collapseGameChat()
 	{
 		return false;
 	}
 
 	@ConfigItem(
-		keyName = "chatMessageCountColor",
-		name = "Collapsed chat message count color",
-		description = "Color of the appended count on collapsed chat messages",
-		position = 8
+		keyName = "collapsePlayerChat",
+		name = "Collapse Player Chat",
+		description = "Collapse duplicate player chat messages into a single line",
+		position = 10
 	)
-	default Color chatMessageCountColor()
+	default boolean collapsePlayerChat()
 	{
-		return Color.decode("#FF00FF");
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "maxRepeatedPublicChats",
+		name = "Max repeated public chats",
+		description = "Block player chat message if repeated this many times. 0 is off",
+		position = 11
+	)
+	default int maxRepeatedPublicChats()
+	{
+		return 0;
 	}
 }

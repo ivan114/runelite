@@ -442,7 +442,7 @@ public class MenuEntrySwapperPlugin extends Plugin
 				swap("teleport", option, target, index);
 			}
 
-			if (config.swapHardWoodGrove() && target.contains("rionasta"))
+			if (config.swapHardWoodGroveParcel() && target.contains("rionasta"))
 			{
 				swap("send-parcel", option, target, index);
 			}
@@ -736,6 +736,18 @@ public class MenuEntrySwapperPlugin extends Plugin
 			swap("watson", option, target, index);
 			swap("barbarian guard", option, target, index);
 			swap("random", option, target, index);
+		}
+		else if (shiftModifier && option.equals("value"))
+		{
+			if (config.shopBuy() != null && config.shopBuy() != BuyMode.OFF)
+			{
+				swap(config.shopBuy().getOption(), option, target, index);
+			}
+
+			if (config.shopSell() != null && config.shopSell() != SellMode.OFF)
+			{
+				swap(config.shopSell().getOption(), option, target, index);
+			}
 		}
 		else if (config.shiftClickCustomization() && shiftModifier && !option.equals("use"))
 		{

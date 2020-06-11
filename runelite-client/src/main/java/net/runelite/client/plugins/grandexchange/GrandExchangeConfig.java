@@ -28,9 +28,11 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-@ConfigGroup("grandexchange")
+@ConfigGroup(GrandExchangeConfig.CONFIG_GROUP)
 public interface GrandExchangeConfig extends Config
 {
+	String CONFIG_GROUP = "grandexchange";
+
 	@ConfigItem(
 		position = 1,
 		keyName = "quickLookup",
@@ -76,12 +78,13 @@ public interface GrandExchangeConfig extends Config
 	}
 
 	@ConfigItem(
-			position = 5,
-			keyName = "enableHAValue",
-			name = "Enable HA Price on GE",
-			description = "Shows the HA value on the GE"
+		position = 5,
+		keyName = "enableGELimitReset",
+		name = "Enable GE Limit Reset Timer",
+		description = "Shows when GE Trade limits reset (H:MM)"
 	)
-	default boolean enableHAValue()
+
+	default boolean enableGELimitReset()
 	{
 		return true;
 	}
@@ -131,5 +134,16 @@ public interface GrandExchangeConfig extends Config
 	default GrandExchangeSearchMode geSearchMode()
 	{
 		return GrandExchangeSearchMode.DEFAULT;
+	}
+
+	@ConfigItem(
+		position = 10,
+		keyName = "enableHAValue",
+		name = "Enable HA Price on GE",
+		description = "Shows the HA value on the GE"
+	)
+	default boolean enableHAValue()
+	{
+		return true;
 	}
 }
