@@ -551,9 +551,21 @@ public interface MenuEntrySwapperConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "swapBuyPlank",
-			name = "Buy Planks",
-			description = "Swap Trade with Buy-plank on Annette"
+		keyName = "swapTan",
+		name = "Tan",
+		description = "Swap Tan 1 with Tan All",
+		section = uiSection
+	)
+	default boolean swapTan()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "swapBuyPlank",
+		name = "Buy Planks",
+		description = "Swap Trade with Buy-plank on Annette",
+		section = npcSection
 	)
 	default boolean swapBuyPlanks()
 	{
